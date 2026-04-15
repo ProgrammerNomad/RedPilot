@@ -50,13 +50,12 @@ The RedPilot extension icon will appear in your toolbar.
 
 ## Step 4 - Add Your OpenAI API Key
 
-Open `contents/reddit.tsx` and replace the placeholder:
+Click the **RedPilot** icon in your Chrome toolbar. A small popup will open with a password input.
 
-```ts
-const API_KEY = "sk-..."  // your OpenAI key here
-```
+1. Paste your OpenAI key (`sk-...`)
+2. Click **Save**
 
-> **Warning:** Never commit your API key to Git. Add a `.gitignore` entry or use environment variables. See [api-reference.md](api-reference.md) for secure handling.
+The key is written to `chrome.storage.local` via `@plasmohq/storage`. It stays in your browser only - it is never sent anywhere except directly to OpenAI when you click a button. It is not in the source code, so pushing to GitHub is safe with no extra steps.
 
 ---
 

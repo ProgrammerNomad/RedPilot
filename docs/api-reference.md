@@ -137,14 +137,19 @@ Tuning tips:
 
 ### Day 1 (Extension only)
 
-The API key lives in the extension code. Risks:
+The key is entered by the user via the popup UI and stored in `chrome.storage.local` using `@plasmohq/storage`. It is never written into source code.
 
-- Anyone who unpacks the `.crx` can read the key
-- No per-user rate limiting
+- The source code contains no key - pushing to GitHub exposes nothing
+- The key lives in the browser's extension storage, scoped to RedPilot only
+- Other pages and extensions cannot read it
 
-Mitigation for now:
+Remaining risks:
+- No per-user rate limiting - one key covers all usage on that machine
+- If the browser profile is compromised, `chrome.storage.local` can be read
+
+Mitigation:
 - Set a **monthly spend limit** in the OpenAI dashboard
-- Restrict the key to only the `chat.completions` endpoint if possible
+- Use a separate key for RedPilot so you can revoke it without affecting other projects
 
 ### Phase 2 (With backend)
 

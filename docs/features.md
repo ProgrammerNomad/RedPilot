@@ -12,17 +12,29 @@ These functions exist once and are used by every feature. Never duplicate their 
 
 All API calls go through this one function. Adding a new feature that needs the API means calling this, not writing a new `fetch` block.
 
+The key is read at call time from `chrome.storage.local` via `@plasmohq/storage`. No key is ever hardcoded.
+
 ```ts
-const API_KEY = "YOUR_OPENAI_API_KEY" // never hardcode a real key
+const storage = new Storage()
+
+async function getApiKey(): Promise<string> {
+  const key = await storage.get("openai_key")
+  return (key as string) ?? ""
+}
 
 async function callOpenAI(
   messages: { role: string; content: string }[],
   n = 1
 ): Promise<string[]> {
+  const apiKey = await getApiKey()
+  if (!apiKey) {
+    return ["No API key set. Click the RedPilot icon in your toolbar to add one."]
+  }
+
   const res = await fetch("https://api.openai.com/v1/chat/completions", {
     method: "POST",
     headers: {
-      Authorization: `Bearer ${API_KEY}`,
+      Authorization: `Bearer ${apiKey}`,
       "Content-Type": "application/json"
     },
     body: JSON.stringify({

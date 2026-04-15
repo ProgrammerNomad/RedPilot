@@ -31,7 +31,7 @@ RedPilot is a Chrome Extension built with the [Plasmo](https://www.plasmo.com/) 
 ```
 
 - **No backend.** API calls go directly from the content script to OpenAI.
-- **API key** is stored in the extension for now (see [api-reference.md](api-reference.md) for risks and mitigation).
+- **API key** is entered by the user in the popup and stored in `chrome.storage.local` via `@plasmohq/storage`. It is never in source code (see [api-reference.md](api-reference.md) for risks and mitigation).
 - **No data is stored** on any server or database.
 
 ---
