@@ -54,6 +54,26 @@ RedPilot is a **human-assisted** tool, never a bot. These rules apply to all cod
 - Add `// SAFETY:` comments on any line that touches Reddit's DOM to make review easy
 - Prefer `const` over `let`; avoid `var`
 
+## Single Source of Truth
+
+Before writing any new function, check if the logic already exists. If the same operation happens in two places, extract it.
+
+Known shared utilities that must not be duplicated:
+
+| Utility | What it does | Where it lives |
+|---|---|---|
+| `callOpenAI(messages, n?)` | All OpenAI fetch calls - headers, error handling, parsing | `contents/reddit.tsx` top of file |
+| `getSubreddit()` | `window.location.pathname.split("/")[2]` | `contents/reddit.tsx` top of file |
+| `createButton(label, className)` | Creates a styled DOM button element | `contents/reddit.tsx` |
+| `insertIntoTextarea(text, commentEl)` | Inserts text into the nearest textarea | `contents/reddit.tsx` |
+| `copyToClipboard(text)` | Copies text to clipboard | `contents/reddit.tsx` |
+
+Rules:
+- Never write `fetch("https://api.openai.com/..."` more than once - always go through `callOpenAI`
+- Never write `window.location.pathname.split("/")[2]` more than once - always call `getSubreddit()`
+- Never inline button styles in more than one place - use `createButton`
+- If you add a new feature that calls the API, it uses `callOpenAI`, not a new fetch block
+
 ## Writing Style (Docs, Comments, UI Text)
 
 - No emojis anywhere - not in docs, not in UI button text, not in comments

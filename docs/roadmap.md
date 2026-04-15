@@ -16,11 +16,19 @@
 
 ## Phase 2 - Polish (Week 1-2)
 
-**Goal:** Make it feel like a real product.
+**Goal:** Make it feel like a real product, not a dev tool.
 
-- [ ] Multiple reply options UI - show both AI replies, let user pick
+**Do these first - highest impact:**
+
+- [ ] Multiple reply options UI - show both AI replies as Option A / Option B, user clicks to insert
+- [ ] Better insert targeting - insert into the specific comment box near the clicked button, not generic `querySelector('textarea')`
+- [ ] Subreddit tone override - r/programming gets technical tone, r/india gets casual, configurable
+- [ ] Replace `alert()` with a small floating card for idea output
+- [ ] "Quick Improve" button - rewrites the user's own typed comment before posting
+
+**Then:**
+
 - [ ] Reply style selector - Short / Detailed
-- [ ] Tone selector - Casual / Expert / Technical
 - [ ] Styled buttons (match Reddit's design language)
 - [ ] Loading spinner instead of "Thinking..." text
 - [ ] Error handling with user-visible feedback
@@ -46,11 +54,13 @@
 
 **Goal:** Context-aware replies that feel more human.
 
+- [ ] Parent comment context - grab the comment being replied to and include it in the API call, not just the top-level comment text
+- [ ] Full thread context mode - include post title + top few comments for better situational awareness
 - [ ] Pull subreddit rules and inject them into the system prompt automatically
-- [ ] Analyze comment thread context (not just the single comment) for better replies
 - [ ] Detect post topic and adjust tone automatically
 - [ ] "Remember my style" - learn from replies the user keeps vs. discards
 - [ ] Reply history to avoid repeating similar content
+- [ ] Variation slider - safe replies vs. bold/risky replies, user controlled
 
 ---
 
@@ -85,11 +95,13 @@ Chrome Web Store listing required for public distribution.
 
 ## Ideas Backlog (Nice to Have)
 
-These are good ideas that don't fit current phases but are worth keeping:
+These are good ideas that do not fit current phases but are worth keeping:
 
 - **Reddit trend detector** - surface rising posts in tracked subreddits before they get crowded
 - **Competitor mention alerts** - notify when a brand or topic you track is mentioned
-- **Auto-draft mode** - generate a reply draft in the background as you read a thread, ready when you reach the bottom
+- **Auto-draft mode** - generate a reply draft in the background as you scroll, ready by the time you reach the comment box (no posting, draft only)
+- **Reply human-score** - rate the generated reply on how human it sounds before showing it, only surface replies above a threshold
+- **Anti-detection mode** - force random variation in length, structure, and phrasing across replies to break any detectable pattern
 - **Subreddit persona library** - save different tones per subreddit (e.g., formal in r/law, casual in r/gaming)
 - **Export replies** - download a CSV of all generated replies for review
 - **Firefox port** - extend beyond Chrome using WebExtensions API
