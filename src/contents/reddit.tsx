@@ -10,9 +10,24 @@ export const config: PlasmoCSConfig = {
 
 const storage = new Storage()
 
+function isContextValid(): boolean {
+  try {
+    // access chrome via globalThis to avoid TS type issues in Plasmo's tsconfig
+    const cr = (globalThis as any).chrome
+    return typeof cr !== "undefined" && !!cr?.runtime?.id
+  } catch {
+    return false
+  }
+}
+
 async function getApiKey(): Promise<string> {
-  const key = await storage.get("openai_key")
-  return (key as string) ?? ""
+  if (!isContextValid()) return ""
+  try {
+    const key = await storage.get("openai_key")
+    return (key as string) ?? ""
+  } catch {
+    return ""
+  }
 }
 
 async function callOpenAI(
@@ -110,16 +125,51 @@ function copyToClipboard(text: string) {
 }
 
 function insertIntoTextarea(text: string, commentEl: Element) {
-  // SAFETY: scope to the clicked comment element first, fall back to page
+  // SAFETY: try textarea first (old.reddit.com), then Lexical editor (new Reddit)
+
+  // 1. old Reddit plain textarea
   const textarea =
     commentEl.querySelector<HTMLTextAreaElement>("textarea") ??
     document.querySelector<HTMLTextAreaElement>("textarea")
 
-  if (!textarea) return
-  textarea.focus()
-  textarea.value = text
-  textarea.dispatchEvent(new Event("input", { bubbles: true }))
-  textarea.dispatchEvent(new Event("change", { bubbles: true }))
+  if (textarea) {
+    textarea.focus()
+    textarea.value = text
+    textarea.dispatchEvent(new Event("input", { bubbles: true }))
+    textarea.dispatchEvent(new Event("change", { bubbles: true }))
+    return
+  }
+
+  // 2. new Reddit - check if THIS comment's Lexical editor is already open.
+  //    Clicking Reply when the box is already open toggles it closed.
+  // SAFETY: scope to commentEl so we don't accidentally detect the main post's reply box!
+  const localEditors = [
+    ...commentEl.querySelectorAll<HTMLElement>('[contenteditable="true"][data-lexical-editor="true"]')
+  ]
+  const editorAlreadyOpen = !!localEditors.find((e) => e.getBoundingClientRect().width > 0)
+
+  if (!editorAlreadyOpen) {
+    // Try primary reply button selector, then fallback to any button containing 'Reply' text/aria
+    const replyBtn =
+      commentEl.querySelector<HTMLElement>('faceplate-tracker[noun="reply_comment"] button') ||
+      commentEl.querySelector<HTMLElement>('button[aria-label*="reply" i]') ||
+      [...commentEl.querySelectorAll<HTMLElement>('button')].find(b => b.innerText.toLowerCase().includes("reply"))
+    
+    if (replyBtn) {
+      replyBtn.scrollIntoView({ behavior: "smooth", block: "center" })
+      replyBtn.click()
+    }
+  }
+
+  // Tag this comment so the main world script knows exactly where to paste
+  const targetId = `redpilot-target-${Math.random().toString(36).slice(2)}`
+  commentEl.setAttribute("data-redpilot-target", targetId)
+
+  // SAFETY: message background service worker which calls chrome.scripting.executeScript
+  // with world:"MAIN" - this bypasses Reddit's CSP (no inline script needed)
+  setTimeout(() => {
+    chrome.runtime.sendMessage({ action: "redpilot-paste", text, targetId })
+  }, editorAlreadyOpen ? 50 : 800)
 }
 
 // ─── reply UI card ────────────────────────────────────────────────────────────
@@ -263,7 +313,14 @@ function injectIdeaButton() {
 export default function RedPilot() {
   useEffect(() => {
     injectIdeaButton()
-    const interval = setInterval(injectButtons, 2000)
+    const interval = setInterval(() => {
+      // stop polling silently if the extension was reloaded - avoids console spam
+      if (!isContextValid()) {
+        clearInterval(interval)
+        return
+      }
+      injectButtons()
+    }, 2000)
     return () => clearInterval(interval)
   }, [])
 
