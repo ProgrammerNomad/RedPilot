@@ -1,10 +1,10 @@
-# Features – RedPilot
+# Features - RedPilot
 
 All core logic lives in `contents/reddit.tsx`.
 
 ---
 
-## Feature 1 – AI Reply Button
+## Feature 1 - AI Reply Button
 
 ### What it does
 Injects a **RedPilot** button under every Reddit comment. On click, it sends the comment text to OpenAI and generates a contextual reply, then inserts it directly into the textarea.
@@ -69,7 +69,7 @@ function injectButtons() {
       copyToClipboard(selected)
       insertIntoTextarea(selected)
 
-      btn.innerText = "Ready ✅"
+      btn.innerText = "Ready - done"
     }
 
     el.appendChild(btn)
@@ -82,7 +82,7 @@ Requesting 2 completions gives you options to pick from. Currently `replies[0]` 
 
 ---
 
-## Feature 2 – Auto-Fill Textarea
+## Feature 2 - Auto-Fill Textarea
 
 ### What it does
 Inserts the generated reply directly into Reddit's comment textarea, so you can review and post immediately.
@@ -105,7 +105,7 @@ Reddit's DOM changes occasionally. If `textarea` stops working, open DevTools on
 
 ---
 
-## Feature 3 – Copy to Clipboard
+## Feature 3 - Copy to Clipboard
 
 ```ts
 function copyToClipboard(text: string) {
@@ -117,9 +117,9 @@ Both copy and insert happen simultaneously. The clipboard acts as a backup in ca
 
 ---
 
-## Feature 4 – Polling Loop (Dynamic DOM)
+## Feature 4 - Polling Loop (Dynamic DOM)
 
-Reddit is a React SPA — comments load without full page reloads. The injection loop handles this:
+Reddit is a React SPA - comments load without full page reloads. The injection loop handles this:
 
 ```ts
 export default function () {
@@ -135,7 +135,7 @@ Every 2 seconds, `injectButtons` checks for new comment elements and skips any t
 
 ---
 
-## Feature 5 – Post Idea Generator (Floating Button)
+## Feature 5 - Post Idea Generator (Floating Button)
 
 ### What it does
 A fixed floating button appears on any subreddit page. Click it to get 5 fresh post ideas tailored to that community.
@@ -194,12 +194,12 @@ document.body.appendChild(ideaBtn)
 
 ### Reply Style Selector
 A small UI (in the popup or inline) letting you pick:
-- **Short** — 1-2 sentences
-- **Detailed** — full paragraph with context
+- **Short** - 1-2 sentences
+- **Detailed** - full paragraph with context
 
 ### Tone Selector
-- **Casual** — conversational, relaxed
-- **Expert** — authoritative, cite-heavy
+- **Casual** - conversational, relaxed
+- **Expert** - authoritative, cite-heavy
 
 ### Multiple Reply Options UI
 Instead of auto-picking `replies[0]`, show both replies in a small card and let the user click the one they want.

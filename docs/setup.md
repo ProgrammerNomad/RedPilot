@@ -1,4 +1,4 @@
-# Setup Guide – RedPilot
+# Setup Guide - RedPilot
 
 ## Prerequisites
 
@@ -12,7 +12,7 @@ Install these before starting:
 
 ---
 
-## Step 1 – Scaffold the Project
+## Step 1 - Scaffold the Project
 
 ```bash
 npm create plasmo
@@ -25,7 +25,7 @@ When prompted:
 
 ---
 
-## Step 2 – Install & Run Dev Mode
+## Step 2 - Install & Run Dev Mode
 
 ```bash
 cd redpilot
@@ -37,7 +37,7 @@ Plasmo will build the extension into `build/chrome-mv3-dev` and watch for change
 
 ---
 
-## Step 3 – Load Extension in Chrome
+## Step 3 - Load Extension in Chrome
 
 1. Open Chrome and navigate to `chrome://extensions`
 2. Enable **Developer mode** (top right toggle)
@@ -48,7 +48,7 @@ The RedPilot extension icon will appear in your toolbar.
 
 ---
 
-## Step 4 – Add Your OpenAI API Key
+## Step 4 - Add Your OpenAI API Key
 
 Open `contents/reddit.tsx` and replace the placeholder:
 
@@ -60,12 +60,12 @@ const API_KEY = "sk-..."  // your OpenAI key here
 
 ---
 
-## Step 5 – Test on Reddit
+## Step 5 - Test on Reddit
 
 1. Navigate to any Reddit thread (e.g., `reddit.com/r/learnprogramming`)
 2. Wait ~2 seconds for the content script to inject
 3. You should see a **RedPilot** button under each comment
-4. Click it — a reply will be generated and inserted into the comment box
+4. Click it - a reply will be generated and inserted into the comment box
 
 ---
 
@@ -75,8 +75,8 @@ Install these for the best dev experience:
 
 - **ESLint** (`dbaeumer.vscode-eslint`)
 - **Prettier** (`esbenp.prettier-vscode`)
-- **Tailwind CSS IntelliSense** (`bradlc.vscode-tailwindcss`) — optional
-- **GitHub Copilot** — for selector hunting and bug fixes
+- **Tailwind CSS IntelliSense** (`bradlc.vscode-tailwindcss`) - optional
+- **GitHub Copilot** - for selector hunting and bug fixes
 
 ---
 
@@ -96,7 +96,7 @@ Output goes to `build/chrome-mv3-prod`. Zip this folder to submit to the Chrome 
 |---|---|
 | Buttons not appearing | Reload the extension in `chrome://extensions`, then hard-refresh Reddit |
 | API errors | Check your API key is valid and has billing set up |
-| `textarea` not found | Reddit may have updated its DOM — use DevTools to find the new selector |
+| `textarea` not found | Reddit may have updated its DOM - use DevTools to find the new selector |
 | Extension not loading | Make sure you selected the correct `build/chrome-mv3-dev` folder |
 
 ---

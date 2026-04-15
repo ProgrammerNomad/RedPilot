@@ -1,6 +1,6 @@
-# RedPilot – Reddit AI Copilot
+# RedPilot - Reddit AI Copilot
 
-> A Chrome Extension that helps you write better Reddit replies faster — powered by AI, built for humans.
+> A Chrome Extension that helps you write better Reddit replies faster - powered by AI, built for humans.
 
 ![License](https://img.shields.io/badge/license-MIT-blue)
 ![Platform](https://img.shields.io/badge/platform-Chrome-yellow)
@@ -10,9 +10,9 @@
 
 ## What is RedPilot?
 
-RedPilot is a Chrome extension that sits on Reddit and gives you an AI-powered reply button under every comment. It generates human-like, contextually relevant replies using OpenAI — you review, edit slightly, and post. That's it.
+RedPilot is a Chrome extension that sits on Reddit and gives you an AI-powered reply button under every comment. It generates human-like, contextually relevant replies using OpenAI - you review, edit slightly, and post. That's it.
 
-This is **not a bot**. It is a **thinking assistant** — you stay in full control of every post.
+This is **not a bot**. It is a **thinking assistant** - you stay in full control of every post.
 
 ---
 
@@ -47,10 +47,10 @@ See [docs/setup.md](docs/setup.md) for the full setup guide.
 
 ```
 RedPilot (Chrome Extension)
-   ↓
-Content Script — runs on Reddit pages
-   ↓
-OpenAI API — gpt-4o-mini (direct, no backend on Day 1)
+   |
+Content Script - runs on Reddit pages
+   |
+OpenAI API - gpt-4o-mini (direct, no backend on Day 1)
 ```
 
 No backend required to get started. See [docs/architecture.md](docs/architecture.md) for the full diagram and upgrade path.
@@ -60,10 +60,10 @@ No backend required to get started. See [docs/architecture.md](docs/architecture
 ## Project Structure
 
 ```
-/contents/reddit.tsx      ← main logic (inject buttons, call API)
-/background/index.ts      ← optional service worker
-/popup/index.tsx          ← optional settings UI
-/docs/                    ← full project documentation
+/contents/reddit.tsx      - main logic (inject buttons, call API)
+/background/index.ts      - optional service worker
+/popup/index.tsx          - optional settings UI
+/docs/                    - full project documentation
 ```
 
 ---
@@ -107,7 +107,7 @@ See [docs/safety.md](docs/safety.md) for full guidelines.
 | [docs/features.md](docs/features.md) | Feature breakdown with code |
 | [docs/api-reference.md](docs/api-reference.md) | OpenAI API usage reference |
 | [docs/safety.md](docs/safety.md) | Reddit safety & ban prevention |
-| [docs/roadmap.md](docs/roadmap.md) | MVP → next level plan |
+| [docs/roadmap.md](docs/roadmap.md) | MVP to next level plan |
 
 ---
 

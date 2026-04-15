@@ -1,4 +1,4 @@
-# API Reference – RedPilot
+# API Reference - RedPilot
 
 ## OpenAI API
 
@@ -18,7 +18,7 @@ Authorization: Bearer YOUR_API_KEY
 
 ---
 
-## Request – Reply Generation
+## Request - Reply Generation
 
 ```json
 {
@@ -46,7 +46,7 @@ Authorization: Bearer YOUR_API_KEY
 
 ---
 
-## Request – Post Idea Generation
+## Request - Post Idea Generation
 
 ```json
 {
@@ -151,7 +151,7 @@ Mitigation for now:
 Move the key to a Node.js backend:
 
 ```
-Extension → your server (with user auth) → OpenAI
+Extension -> your server (with user auth) -> OpenAI
 ```
 
 The extension never sees the raw key. The server rate-limits per user. See [architecture.md](architecture.md) for the Phase 2 diagram.
@@ -181,4 +181,4 @@ async function generateReply(text: string, subreddit: string) {
 }
 ```
 
-Always handle failures gracefully — show a fallback message rather than leaving the button stuck on "Thinking...".
+Always handle failures gracefully - show a fallback message rather than leaving the button stuck on "Thinking...".

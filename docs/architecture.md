@@ -1,4 +1,4 @@
-# Architecture – RedPilot
+# Architecture - RedPilot
 
 ## Overview
 
@@ -9,23 +9,25 @@ RedPilot is a Chrome Extension built with the [Plasmo](https://www.plasmo.com/) 
 ## Day 1 Architecture (MVP)
 
 ```
-┌────────────────────────────────────┐
-│         Chrome Extension           │
-│                                    │
-│  /contents/reddit.tsx              │
-│   ├── injectButtons()              │
-│   ├── generateReply()              │
-│   ├── generateIdeas()              │
-│   ├── insertIntoTextarea()         │
-│   └── copyToClipboard()            │
-└────────────┬───────────────────────┘
-             │ fetch()
-             ▼
-┌────────────────────────────────────┐
-│         OpenAI API                 │
-│  https://api.openai.com/v1/chat/   │
-│  Model: gpt-4o-mini                │
-└────────────────────────────────────┘
++------------------------------------+
+|         Chrome Extension           |
+|                                    |
+|  /contents/reddit.tsx              |
+|   - injectButtons()                |
+|   - generateReply()                |
+|   - generateIdeas()                |
+|   - insertIntoTextarea()           |
+|   - copyToClipboard()              |
++------------------------------------+
+             |
+          fetch()
+             |
+             v
++------------------------------------+
+|         OpenAI API                 |
+|  https://api.openai.com/v1/chat/   |
+|  Model: gpt-4o-mini                |
++------------------------------------+
 ```
 
 - **No backend.** API calls go directly from the content script to OpenAI.
@@ -38,28 +40,28 @@ RedPilot is a Chrome Extension built with the [Plasmo](https://www.plasmo.com/) 
 
 ```
 Reddit page loads
-       │
-       ▼
+       |
+       v
 Content script injects (setInterval every 2s)
-       │
-       ▼
+       |
+       v
 Detects comment elements
-       │
-       ▼
+       |
+       v
 Injects [RedPilot] button if not already present
-       │
+       |
   User clicks button
-       │
-       ▼
+       |
+       v
 Sends comment text to OpenAI API
-       │
-       ▼
+       |
+       v
 Returns 2 reply options
-       │
-       ▼
+       |
+       v
 Inserts reply[0] into textarea + copies to clipboard
-       │
-  User edits → posts manually
+       |
+  User edits - posts manually
 ```
 
 ---
@@ -69,22 +71,24 @@ Inserts reply[0] into textarea + copies to clipboard
 When you need to protect the API key or add user accounts, introduce a lightweight backend.
 
 ```
-┌────────────────────────────────────┐
-│         Chrome Extension           │
-└────────────┬───────────────────────┘
-             │ fetch (with auth token)
-             ▼
-┌────────────────────────────────────┐
-│   Node.js Backend (Express/Hono)   │
-│   - validates user token           │
-│   - proxies request to OpenAI      │
-│   - rate-limits per user           │
-└────────────┬───────────────────────┘
-             │
-             ▼
-┌────────────────────────────────────┐
-│         OpenAI API                 │
-└────────────────────────────────────┘
++------------------------------------+
+|         Chrome Extension           |
++------------------------------------+
+             |
+          fetch (with auth token)
+             |
+             v
++------------------------------------+
+|   Node.js Backend (Express/Hono)   |
+|   - validates user token           |
+|   - proxies request to OpenAI      |
+|   - rate-limits per user           |
++------------------------------------+
+             |
+             v
++------------------------------------+
+|         OpenAI API                 |
++------------------------------------+
 ```
 
 Recommended backend stack:
@@ -99,7 +103,7 @@ Recommended backend stack:
 
 | File | Responsibility |
 |---|---|
-| `contents/reddit.tsx` | All core logic — inject, generate, insert |
+| `contents/reddit.tsx` | All core logic - inject, generate, insert |
 | `background/index.ts` | Service worker for future messaging or alarms |
 | `popup/index.tsx` | Settings UI (API key input, tone selector) |
 | `docs/` | Project documentation |
@@ -117,4 +121,4 @@ Key permissions needed:
 }
 ```
 
-Plasmo handles `manifest.json` generation from `package.json` metadata — you do not edit it directly.
+Plasmo handles `manifest.json` generation from `package.json` metadata - you do not edit it directly.
