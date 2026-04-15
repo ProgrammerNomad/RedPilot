@@ -124,10 +124,36 @@ function copyToClipboard(text: string) {
   })
 }
 
-function insertIntoTextarea(text: string, commentEl: Element) {
-  // SAFETY: try textarea first (old.reddit.com), then Lexical editor (new Reddit)
+// ─── editor wait helper ────────────────────────────────────────────────────────
+// NOTE: shreddit-comment is a Web Component with a Shadow DOM.
+// querySelectorAll() from a content script CANNOT pierce Shadow roots.
+// Solution: search the flat document-level DOM. Reddit only allows one reply
+// box open at a time so the first visible div[role="textbox"] is always correct.
 
-  // 1. old Reddit plain textarea
+const EDITOR_SELECTOR = 'div[role="textbox"], [contenteditable="true"]:not(input):not([role="combobox"]), textarea'
+
+function findVisibleEditor(): HTMLElement | null {
+  return (
+    Array.from(document.querySelectorAll<HTMLElement>(EDITOR_SELECTOR))
+      .find((e) => {
+        const r = e.getBoundingClientRect()
+        return r.width > 0 && r.height > 0
+      }) ?? null
+  )
+}
+
+async function waitForVisibleEditor(maxMs = 2400): Promise<HTMLElement | null> {
+  const step = 120
+  for (let elapsed = 0; elapsed < maxMs; elapsed += step) {
+    const ed = findVisibleEditor()
+    if (ed) return ed
+    await new Promise((r) => setTimeout(r, step))
+  }
+  return null
+}
+
+async function insertIntoTextarea(text: string, commentEl: Element) {
+  // 1. old Reddit plain textarea (no Shadow DOM issues)
   const textarea =
     commentEl.querySelector<HTMLTextAreaElement>("textarea") ??
     document.querySelector<HTMLTextAreaElement>("textarea")
@@ -140,36 +166,58 @@ function insertIntoTextarea(text: string, commentEl: Element) {
     return
   }
 
-  // 2. new Reddit - check if THIS comment's Lexical editor is already open.
-  //    Clicking Reply when the box is already open toggles it closed.
-  // SAFETY: scope to commentEl so we don't accidentally detect the main post's reply box!
-  const localEditors = [
-    ...commentEl.querySelectorAll<HTMLElement>('[contenteditable="true"][data-lexical-editor="true"]')
-  ]
-  const editorAlreadyOpen = !!localEditors.find((e) => e.getBoundingClientRect().width > 0)
+  // 2. Check if a reply editor is already visible in the document
+  let editor = findVisibleEditor()
 
-  if (!editorAlreadyOpen) {
-    // Try primary reply button selector, then fallback to any button containing 'Reply' text/aria
+  // 3. If not visible, click Reply to open it
+  if (!editor) {
     const replyBtn =
       commentEl.querySelector<HTMLElement>('faceplate-tracker[noun="reply_comment"] button') ||
       commentEl.querySelector<HTMLElement>('button[aria-label*="reply" i]') ||
-      [...commentEl.querySelectorAll<HTMLElement>('button')].find(b => b.innerText.toLowerCase().includes("reply"))
-    
-    if (replyBtn) {
-      replyBtn.scrollIntoView({ behavior: "smooth", block: "center" })
-      replyBtn.click()
-    }
+      [...commentEl.querySelectorAll<HTMLElement>("button")].find((b) =>
+        b.innerText.toLowerCase().includes("reply")
+      )
+
+    replyBtn?.click()
+
+    // 4. Wait up to 2.4s for the editor to appear in the document
+    editor = await waitForVisibleEditor()
   }
 
-  // Tag this comment so the main world script knows exactly where to paste
-  const targetId = `redpilot-target-${Math.random().toString(36).slice(2)}`
-  commentEl.setAttribute("data-redpilot-target", targetId)
+  if (!editor) {
+    console.warn("RedPilot: no visible editor found in document")
+    return
+  }
 
-  // SAFETY: message background service worker which calls chrome.scripting.executeScript
-  // with world:"MAIN" - this bypasses Reddit's CSP (no inline script needed)
-  setTimeout(() => {
-    chrome.runtime.sendMessage({ action: "redpilot-paste", text, targetId })
-  }, editorAlreadyOpen ? 50 : 800)
+  // 5. Give Lexical 200ms to finish mounting its internal listeners
+  await new Promise((r) => setTimeout(r, 200))
+
+  // 6. Focus + bring into view
+  editor.focus()
+  editor.click()
+  editor.scrollIntoView({ behavior: "smooth", block: "nearest" })
+
+  // 7. Tag the editor with a uid so the background script can find it exactly
+  const uid = `rp-${Date.now()}`
+  editor.setAttribute("data-rp-uid", uid)
+
+  // 8. Send to background which uses chrome.scripting.executeScript world:MAIN
+  //    This is the ONLY approach that bypasses CSP and the isolated-world boundary.
+  try {
+    const cr = (globalThis as any).chrome
+    cr.runtime.sendMessage(
+      { action: "redpilot-paste", text, uid },
+      (response: any) => {
+        if ((globalThis as any).chrome?.runtime?.lastError) {
+          console.warn("[RedPilot] sendMessage error:", (globalThis as any).chrome.runtime.lastError.message)
+        } else {
+          console.log("[RedPilot] sendMessage OK, response:", response)
+        }
+      }
+    )
+  } catch (e) {
+    console.warn("[RedPilot] sendMessage threw:", e)
+  }
 }
 
 // ─── reply UI card ────────────────────────────────────────────────────────────
@@ -207,9 +255,10 @@ function showReplyCard(
     text.style.cssText = "margin-bottom: 6px; color: #222; line-height: 1.5;"
 
     const insertBtn = createButton("Insert", `redpilot-insert-${i}`)
-    insertBtn.onclick = () => {
-      // SAFETY: inserts into Reddit's comment textarea
-      insertIntoTextarea(reply, commentEl)
+    insertBtn.onclick = async () => {
+      insertBtn.innerText = "Opening…"
+      insertBtn.style.opacity = "0.6"
+      await insertIntoTextarea(reply, commentEl)
       copyToClipboard(reply)
       card.remove()
       anchorBtn.innerText = "RedPilot"
